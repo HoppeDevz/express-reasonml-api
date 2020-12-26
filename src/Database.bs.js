@@ -51,10 +51,19 @@ function createAdminAccountsTable(param) {
               }));
 }
 
+function createAdminAccount(username, password) {
+  var sql = "INSERT INTO admin_accounts (username, value) VALUES('" + (username + ("','" + (password + "')")));
+  var partial_arg = connection.contents;
+  return function (param) {
+    return MySql2.execute(partial_arg, sql, undefined, param);
+  };
+}
+
 exports.connection = connection;
 exports.con = con;
 exports.showDataBases = showDataBases;
 exports.createDatabase = createDatabase;
 exports.changeConnectionToDatabase = changeConnectionToDatabase;
 exports.createAdminAccountsTable = createAdminAccountsTable;
+exports.createAdminAccount = createAdminAccount;
 /* connection Not a pure module */

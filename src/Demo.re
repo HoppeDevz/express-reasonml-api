@@ -4,10 +4,8 @@ let app = express();
 let serverPORT = 30120
 let stringServerPort = "30120"
 
-/*Database.showDataBases();*/
 Database.createDatabase();
 Database.changeConnectionToDatabase();
-Database.createAdminAccountsTable();
 
 
 let onListen = e =>
@@ -55,20 +53,36 @@ Middleware.from((next, req) => {
     myjson() |> Response.sendJson;
 });
 
-App.post(app, ~path="/reasonpost/:id") @@
+type accountdata = {
+  username: option(Js.String.t),
+  password: option(Js.String.t)
+};
+
+App.post(app, ~path="/create_admin_user/:username/:password") @@
 Middleware.from((next, req) => {
-  let req_id = getDictString(Request.params(req), "id");
+  let req_username = getDictString(Request.params(req), "username");
+  let req_password = getDictString(Request.params(req), "password");
+
+  let accountdata = {
+    username: req_username,
+    password: req_password
+  }
+
   let myjson = (status: bool) => {
     let json = Js.Dict.empty();
     Js.Dict.set(json, "success", Js.Json.boolean(status));
     Js.Json.object_(json);
   }
 
-    let reqData = Request.params(req);
-    switch (Js.Dict.get(reqData, "id")) {
-    | Some(json) => Response.sendJson(myjson(true));
-    | _ => Response.sendJson(myjson(false));
+  switch (req_username)  {
+  | Some(username) => {
+    switch(req_password) {
+    | Some(password) => myjson(true) |> Response.sendJson;
+    | _ => myjson(false) |> Response.sendJson;
     }
+  }
+  | _ => myjson(false) |> Response.sendJson;
+  }
     
 });
 

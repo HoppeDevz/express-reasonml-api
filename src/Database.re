@@ -41,3 +41,9 @@ let createAdminAccountsTable = () => {
         }
     });
 }
+
+
+let createAdminAccount = (username: string, password: string) => {
+    let sql = "INSERT INTO admin_accounts (username, value) VALUES('" ++ username ++ "','" ++ password ++ "')";
+    MySql2.execute(connection^, sql, None); 
+}

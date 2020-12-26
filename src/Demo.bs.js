@@ -21,8 +21,6 @@ Database$MyNewProject.createDatabase(undefined);
 
 Database$MyNewProject.changeConnectionToDatabase(undefined);
 
-Database$MyNewProject.createAdminAccountsTable(undefined);
-
 function onListen(e) {
   var val;
   try {
@@ -100,24 +98,29 @@ Express.App.get(app, "/hello", Express.Middleware.from(function (next, req) {
           };
         }));
 
-Express.App.post(app, "/reasonpost/:id", Express.Middleware.from(function (next, req) {
-          getDictString(Express.$$Request.params(req), "id");
+Express.App.post(app, "/create_admin_user/:username/:password", Express.Middleware.from(function (next, req) {
+          var req_username = getDictString(Express.$$Request.params(req), "username");
+          var req_password = getDictString(Express.$$Request.params(req), "password");
           var myjson = function (status) {
             var json = {};
             json["success"] = status;
             return json;
           };
-          var reqData = Express.$$Request.params(req);
-          var json = Js_dict.get(reqData, "id");
-          if (json !== undefined) {
-            var partial_arg = myjson(true);
+          if (req_username !== undefined) {
+            if (req_password !== undefined) {
+              var partial_arg = myjson(true);
+              return function (param) {
+                return Express.$$Response.sendJson(partial_arg, param);
+              };
+            }
+            var partial_arg$1 = myjson(false);
             return function (param) {
-              return Express.$$Response.sendJson(partial_arg, param);
+              return Express.$$Response.sendJson(partial_arg$1, param);
             };
           }
-          var partial_arg$1 = myjson(false);
+          var partial_arg$2 = myjson(false);
           return function (param) {
-            return Express.$$Response.sendJson(partial_arg$1, param);
+            return Express.$$Response.sendJson(partial_arg$2, param);
           };
         }));
 
