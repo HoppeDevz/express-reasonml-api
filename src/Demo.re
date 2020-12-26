@@ -1,7 +1,13 @@
 open Express;
+
 let app = express();
 let serverPORT = 30120
 let stringServerPort = "30120"
+
+/*Database.showDataBases();*/
+Database.createDatabase();
+Database.changeConnectionToDatabase();
+
 
 let onListen = e =>
   switch (e) {
@@ -11,15 +17,31 @@ let onListen = e =>
   | _ => Js.log @@ "Listening at http://127.0.0.1:" ++ stringServerPort
 };
 
-let makeSuccessJson = () => {
-    let json = Js.Dict.empty();
-    Js.Dict.set(json, "success", Js.Json.string("Hello World!"));
-    Js.Json.object_(json);
+let getDictString = (dict, key) =>
+  switch (Js.Dict.get(dict, key)) {
+  | Some(json) => Js.Json.decodeString(json)
+  | _ => None
+};
+
+module Body = {
+    type payload = {. "number": int};
+    let jsonDecoder = json =>
+      Json.Decode.({"number": json |> field("number", int)});
+    let urlEncodedDecoder = dict => {
+      "number": Js.Dict.unsafeGet(dict, "number") |> int_of_string,
+    };
+    let encoder = body =>
+      Json.Encode.(object_([("number", body##number |> int)]));
 };
 
 App.get(app, ~path="/reason") @@
 Middleware.from((next, req) => {
-    Response.sendJson(makeSuccessJson());
+    let makeSuccessJson = () => {
+        let json = Js.Dict.empty();
+        Js.Dict.set(json, "success", Js.Json.string("Hello World!"));
+        Js.Json.object_(json);
+    };
+    makeSuccessJson() |> Response.sendJson;
 });
 
 App.get(app, ~path="/hello") @@
@@ -32,41 +54,24 @@ Middleware.from((next, req) => {
     myjson() |> Response.sendJson;
 });
 
+App.post(app, ~path="/reasonpost/:id") @@
+Middleware.from((next, req) => {
+  let req_id = getDictString(Request.params(req), "id");
+  let myjson = (status: bool) => {
+    let json = Js.Dict.empty();
+    Js.Dict.set(json, "success", Js.Json.boolean(status));
+    Js.Json.object_(json);
+  }
+
+    let reqData = Request.params(req);
+    switch (Js.Dict.get(reqData, "id")) {
+    | Some(json) => Response.sendJson(myjson(true));
+    | _ => Response.sendJson(myjson(false));
+    }
+    
+});
+
 let server = App.listen(app, ~port=serverPORT, ~onListen, ());
-
-/*
-
-type person = {
-    firstname: string,
-    lastname: string,
-    age: int,
-}
-
-let myPerson:person = {
-    firstname: "Gabriel",
-    lastname: "Hoppe",
-    age: 17
-}
-
-let myList = [1,2,3];
-let myint:int = 20;
-let mystring:string = "My String";
-
-let listToArray = list => Array.of_list(list);
-let print = value => Js.log(value);
-let incrementOne = (value:int) => Js.log(value + 1);
-
-for (x in 0 to 10) {
-    let y = x + 1;
-    y |> Js.log;
-}
-
-let printFirstName = (person:person) => Js.log(person.firstname);
-
-print(listToArray(myList));
-myPerson |> printFirstName;
-
-*/
 
 
 

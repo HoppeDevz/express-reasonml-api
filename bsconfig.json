@@ -11,7 +11,9 @@
   },
   "suffix": ".bs.js",
   "bs-dependencies": [
-    "bs-express"
+    "bs-express",
+    "bs-mysql2", 
+    "@glennsl/bs-json"
   ],
   "warnings": {
     "error" : "+101"
