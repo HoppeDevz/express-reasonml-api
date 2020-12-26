@@ -7,6 +7,7 @@ let stringServerPort = "30120"
 /*Database.showDataBases();*/
 Database.createDatabase();
 Database.changeConnectionToDatabase();
+Database.createAdminAccountsTable();
 
 
 let onListen = e =>

@@ -40,9 +40,21 @@ function changeConnectionToDatabase(param) {
   
 }
 
+function createAdminAccountsTable(param) {
+  return MySql2.execute(connection.contents, "CREATE TABLE admin_accounts (\n        id int(11) NOT NULL AUTO_INCREMENT,\n        username varchar(255) NOT NULL,\n        password varchar(512) NOT NULL,\n        PRIMARY KEY(id)\n    )", undefined, (function (res) {
+                if (typeof res === "string" || res.NAME !== "Error") {
+                  console.log("[DATABASE] CREATED TABLE admin_accounts");
+                } else {
+                  console.log("ERROR: ", res.VAL);
+                }
+                
+              }));
+}
+
 exports.connection = connection;
 exports.con = con;
 exports.showDataBases = showDataBases;
 exports.createDatabase = createDatabase;
 exports.changeConnectionToDatabase = changeConnectionToDatabase;
+exports.createAdminAccountsTable = createAdminAccountsTable;
 /* connection Not a pure module */

@@ -21,6 +21,8 @@ Database$MyNewProject.createDatabase(undefined);
 
 Database$MyNewProject.changeConnectionToDatabase(undefined);
 
+Database$MyNewProject.createAdminAccountsTable(undefined);
+
 function onListen(e) {
   var val;
   try {

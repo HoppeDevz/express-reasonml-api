@@ -27,6 +27,17 @@ let changeConnectionToDatabase = () => {
     Js.log("[DATABASE] NEW CONNECTION STATUS, CHANGE TO reason_ml DATABASE");
 }
 
-let createTableAdminAccounts() => {
-    
+let createAdminAccountsTable = () => {
+    let sql = "CREATE TABLE admin_accounts (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        username varchar(255) NOT NULL,
+        password varchar(512) NOT NULL,
+        PRIMARY KEY(id)
+    )"
+    MySql2.execute(connection^, sql, None, res => {
+        switch(res) {
+        | `Error(e) => Js.log2("ERROR: ", e)
+        | _ => Js.log("[DATABASE] CREATED TABLE admin_accounts")
+        }
+    });
 }
