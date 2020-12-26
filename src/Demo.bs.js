@@ -21,6 +21,19 @@ Database$MyNewProject.createDatabase(undefined);
 
 Database$MyNewProject.changeConnectionToDatabase(undefined);
 
+function price(param) {
+  return Json_decode.field("price", Json_decode.$$float, param);
+}
+
+function obj(param) {
+  return Json_decode.dict(price, param);
+}
+
+var Decode = {
+  price: price,
+  obj: obj
+};
+
 function onListen(e) {
   var val;
   try {
@@ -99,28 +112,22 @@ Express.App.get(app, "/hello", Express.Middleware.from(function (next, req) {
         }));
 
 Express.App.post(app, "/create_admin_user/:username/:password", Express.Middleware.from(function (next, req) {
-          var req_username = getDictString(Express.$$Request.params(req), "username");
-          var req_password = getDictString(Express.$$Request.params(req), "password");
+          var reqData = Express.$$Request.params(req);
+          var req_username = Js_dict.get(reqData, "username");
+          var req_password = Js_dict.get(reqData, "password");
+          if (req_username !== undefined && req_password !== undefined) {
+            Database$MyNewProject.createAdminAccount(Caml_option.valFromOption(req_username), Caml_option.valFromOption(req_password));
+          } else {
+            console.log("None");
+          }
           var myjson = function (status) {
             var json = {};
             json["success"] = status;
             return json;
           };
-          if (req_username !== undefined) {
-            if (req_password !== undefined) {
-              var partial_arg = myjson(true);
-              return function (param) {
-                return Express.$$Response.sendJson(partial_arg, param);
-              };
-            }
-            var partial_arg$1 = myjson(false);
-            return function (param) {
-              return Express.$$Response.sendJson(partial_arg$1, param);
-            };
-          }
-          var partial_arg$2 = myjson(false);
+          var partial_arg = myjson(true);
           return function (param) {
-            return Express.$$Response.sendJson(partial_arg$2, param);
+            return Express.$$Response.sendJson(partial_arg, param);
           };
         }));
 
@@ -131,6 +138,7 @@ var serverPORT = 30120;
 exports.app = app;
 exports.serverPORT = serverPORT;
 exports.stringServerPort = stringServerPort;
+exports.Decode = Decode;
 exports.onListen = onListen;
 exports.getDictString = getDictString;
 exports.Body = Body;

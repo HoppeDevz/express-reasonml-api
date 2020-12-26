@@ -2,6 +2,8 @@
 'use strict';
 
 var MySql2 = require("bs-mysql2/src/MySql2.bs.js");
+var Caml_option = require("bs-platform/lib/js/caml_option.js");
+var Json_encode = require("@glennsl/bs-json/src/Json_encode.bs.js");
 
 var connection = {
   contents: MySql2.Connection.connect("127.0.0.1", 3306, "root", undefined, undefined, undefined)
@@ -52,11 +54,23 @@ function createAdminAccountsTable(param) {
 }
 
 function createAdminAccount(username, password) {
-  var sql = "INSERT INTO admin_accounts (username, value) VALUES('" + (username + ("','" + (password + "')")));
-  var partial_arg = connection.contents;
-  return function (param) {
-    return MySql2.execute(partial_arg, sql, undefined, param);
-  };
+  var named = MySql2.Params.named(Json_encode.object_({
+            hd: [
+              "username",
+              username
+            ],
+            tl: {
+              hd: [
+                "password",
+                password
+              ],
+              tl: /* [] */0
+            }
+          }));
+  return MySql2.execute(connection.contents, "INSERT INTO admin_accounts (username, password) VALUES(:username, :password)", Caml_option.some(named), (function (res) {
+                console.log(res);
+                
+              }));
 }
 
 exports.connection = connection;

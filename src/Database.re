@@ -43,7 +43,15 @@ let createAdminAccountsTable = () => {
 }
 
 
-let createAdminAccount = (username: string, password: string) => {
-    let sql = "INSERT INTO admin_accounts (username, value) VALUES('" ++ username ++ "','" ++ password ++ "')";
-    MySql2.execute(connection^, sql, None); 
+let createAdminAccount = (username: Js.Json.t, password: Js.Json.t) => {
+    let named = MySql2.Params.named(
+        Json.Encode.object_([
+            ("username", username),
+            ("password", password),
+        ])
+    );
+
+    MySql2.execute(connection^, "INSERT INTO admin_accounts (username, password) VALUES(:username, :password)", Some(named), res => {
+        Js.log(res);
+    })
 }
