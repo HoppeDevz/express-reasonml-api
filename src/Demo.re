@@ -39,45 +39,28 @@ module Body = {
       Json.Encode.(object_([("number", body##number |> int)]));
 };
 
-App.get(app, ~path="/reason") @@
-Middleware.from((next, req) => {
-    let makeSuccessJson = () => {
-        let json = Js.Dict.empty();
-        Js.Dict.set(json, "success", Js.Json.string("Hello World!"));
-        Js.Json.object_(json);
-    };
-    makeSuccessJson() |> Response.sendJson;
-});
-
-App.get(app, ~path="/hello") @@
-Middleware.from((next, req) => {
-    let myjson = () => {
-        let json = Js.Dict.empty();
-        Js.Dict.set(json, "success", Js.Json.string("Hello World!"));
-        Js.Json.object_(json);
-    }
-    myjson() |> Response.sendJson;
-});
-
 App.post(app, ~path="/create_admin_user/:username/:password") @@
 Middleware.from((next, req) => {
   let reqData = Request.params(req);
   let req_username: option(Js.Json.t) = Js.Dict.get(reqData, "username");
   let req_password: option(Js.Json.t) = Js.Dict.get(reqData, "password");
 
-  switch (req_username, req_password) {
-  | (Some(username), Some(password)) => Database.createAdminAccount(username, password)
-  | _ => Js.log("None")
-  }
-
   let myjson = (status: bool) => {
     let json = Js.Dict.empty();
-    Js.Dict.set(json, "success", Js.Json.boolean(status));
+    Js.Dict.set(json, "created_user", Js.Json.boolean(status));
     Js.Json.object_(json);
   }
 
-  myjson(true) |> Response.sendJson;
-    
+  let created_user_ = ref(false)
+
+  switch (req_username, req_password) {
+  | (Some(username), Some(password)) => Database.createAdminAccount(username, password, (created_user: bool) => {
+      created_user_.contents = created_user;
+    })
+  }
+
+  myjson(created_user_^) -> Response.sendJson;
+  
 });
 
 let server = App.listen(app, ~port=serverPORT, ~onListen, ());

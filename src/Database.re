@@ -42,7 +42,7 @@ let createAdminAccountsTable = () => {
     });
 }
 
-let createAdminAccount = (username: Js.Json.t, password: Js.Json.t) => {
+let createAdminAccount = (username: Js.Json.t, password: Js.Json.t, callback) => {
     let named = MySql2.Params.named(
         Json.Encode.object_([
             ("username", username),
@@ -52,11 +52,12 @@ let createAdminAccount = (username: Js.Json.t, password: Js.Json.t) => {
 
     let register = value => {
         let stringify_value = Js.Json.stringify(value);
-        stringify_value |> Js.log;
+
         switch (stringify_value == "true") {
-        | false => MySql2.execute(connection^, "INSERT INTO admin_accounts (username, password) VALUES(:username, :password)", Some(named), res => res |> Js.log)
+        | false => MySql2.execute(connection^, "INSERT INTO admin_accounts (username, password) VALUES(:username, :password)", Some(named), res => callback(true))
+        | true => callback(false)
         }
-        
+
     }
 
     let username_string = Js.Json.stringify(username);

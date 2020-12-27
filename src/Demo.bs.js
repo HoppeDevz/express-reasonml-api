@@ -87,45 +87,47 @@ var Body = {
   encoder: encoder
 };
 
-Express.App.get(app, "/reason", Express.Middleware.from(function (next, req) {
-          var makeSuccessJson = function (param) {
-            var json = {};
-            json["success"] = "Hello World!";
-            return json;
-          };
-          var partial_arg = makeSuccessJson(undefined);
-          return function (param) {
-            return Express.$$Response.sendJson(partial_arg, param);
-          };
-        }));
-
-Express.App.get(app, "/hello", Express.Middleware.from(function (next, req) {
-          var myjson = function (param) {
-            var json = {};
-            json["success"] = "Hello World!";
-            return json;
-          };
-          var partial_arg = myjson(undefined);
-          return function (param) {
-            return Express.$$Response.sendJson(partial_arg, param);
-          };
-        }));
-
 Express.App.post(app, "/create_admin_user/:username/:password", Express.Middleware.from(function (next, req) {
           var reqData = Express.$$Request.params(req);
           var req_username = Js_dict.get(reqData, "username");
           var req_password = Js_dict.get(reqData, "password");
-          if (req_username !== undefined && req_password !== undefined) {
-            Database$MyNewProject.createAdminAccount(Caml_option.valFromOption(req_username), Caml_option.valFromOption(req_password));
-          } else {
-            console.log("None");
-          }
           var myjson = function (status) {
             var json = {};
-            json["success"] = status;
+            json["created_user"] = status;
             return json;
           };
-          var partial_arg = myjson(true);
+          var created_user_ = {
+            contents: false
+          };
+          if (req_username !== undefined) {
+            if (req_password !== undefined) {
+              Database$MyNewProject.createAdminAccount(Caml_option.valFromOption(req_username), Caml_option.valFromOption(req_password), (function (created_user) {
+                      created_user_.contents = created_user;
+                      
+                    }));
+            } else {
+              throw {
+                    RE_EXN_ID: "Match_failure",
+                    _1: [
+                      "Demo.re",
+                      56,
+                      2
+                    ],
+                    Error: new Error()
+                  };
+            }
+          } else {
+            throw {
+                  RE_EXN_ID: "Match_failure",
+                  _1: [
+                    "Demo.re",
+                    56,
+                    2
+                  ],
+                  Error: new Error()
+                };
+          }
+          var partial_arg = myjson(created_user_.contents);
           return function (param) {
             return Express.$$Response.sendJson(partial_arg, param);
           };
