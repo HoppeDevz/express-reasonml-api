@@ -65,11 +65,8 @@ Middleware.from((next, req) => {
   let req_username: option(Js.Json.t) = Js.Dict.get(reqData, "username");
   let req_password: option(Js.Json.t) = Js.Dict.get(reqData, "password");
 
-  switch (req_username) {
-  | Some(username) => switch(req_password) {
-    | Some(password) => Database.createAdminAccount(username, password)
-    | _ => Js.log("None")
-  }
+  switch (req_username, req_password) {
+  | (Some(username), Some(password)) => Database.createAdminAccount(username, password)
   | _ => Js.log("None")
   }
 

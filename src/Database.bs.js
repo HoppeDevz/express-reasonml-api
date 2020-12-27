@@ -4,6 +4,7 @@
 var MySql2 = require("bs-mysql2/src/MySql2.bs.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
 var Json_encode = require("@glennsl/bs-json/src/Json_encode.bs.js");
+var MyRequest$MyNewProject = require("./MyRequest.bs.js");
 
 var connection = {
   contents: MySql2.Connection.connect("127.0.0.1", 3306, "root", undefined, undefined, undefined)
@@ -67,10 +68,32 @@ function createAdminAccount(username, password) {
               tl: /* [] */0
             }
           }));
-  return MySql2.execute(connection.contents, "INSERT INTO admin_accounts (username, password) VALUES(:username, :password)", Caml_option.some(named), (function (res) {
-                console.log(res);
-                
-              }));
+  var register = function (value) {
+    var stringify_value = JSON.stringify(value);
+    console.log(stringify_value);
+    var match = stringify_value === "true";
+    if (match) {
+      throw {
+            RE_EXN_ID: "Match_failure",
+            _1: [
+              "Database.re",
+              56,
+              8
+            ],
+            Error: new Error()
+          };
+    }
+    return MySql2.execute(connection.contents, "INSERT INTO admin_accounts (username, password) VALUES(:username, :password)", Caml_option.some(named), (function (res) {
+                  console.log(res);
+                  
+                }));
+  };
+  var username_string = JSON.stringify(username);
+  var req = MyRequest$MyNewProject.checkIfExistAdminUser(username_string);
+  req.then(function (json) {
+        return Promise.resolve(register(json));
+      });
+  
 }
 
 exports.connection = connection;
